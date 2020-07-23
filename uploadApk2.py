@@ -19,15 +19,14 @@ def scan_apk(data):
     post_dict = json.loads(data)
     headers = {'Authorization': APIKEY}
     response = requests.post(SERVER + '/api/v1/scan', data=post_dict, headers=headers)
-    # print(response.text)
+    return response.content
 
-# def json_resp(data):
-#     """Generate JSON Report"""
-#     print("Generate JSON report")
-#     headers = {'Authorization': APIKEY}
-#     data = {"hash": json.loads(data)["hash"]}
-#     response = requests.post(SERVER + '/api/v1/report_json', data=data, headers=headers)
-#     print(response.text)
+def json_resp(data):
+    print("Generate JSON report")
+    headers = {'Authorization': APIKEY}
+    data = {"hash": json.loads(data)["hash"]}
+    response = requests.post(SERVER + '/api/v1/report_json', data=data, headers=headers)
+    return response
 
 def check_file():
     fileName = PATH + "/Code/"+"list_suspicious_apk.txt"
@@ -49,9 +48,17 @@ def send_apk():
     with open (fileName) as myfile:
         for line in myfile:
             res_upload = upload_apk(mal_path + "/" + line.rstrip("\n"))
+            # scan apk
             scan_apk(res_upload)
+            # save json object / scan result
             field_data = json.loads(res_upload)
+            file_name = field_data.get('file_name').replace(".","_")
+            # access API for json report
+            json_res = json_resp(res_upload)
+            json_path = PATH + '/Code/scan_result/'+file_name+'.json'
             dataframe.append(field_data)
+            with open (json_path,'w+') as jp:
+                json.dump(json_res,jp) 
 
 def write_to_json():
     json_file = PATH + '/Code/apk_with_hash.json'
@@ -72,6 +79,7 @@ fileName = check_file()
 walk_malware_path()
 send_apk()
 write_to_json()
+
 # loadtoSQL()        
         
 # def loadtoSQL():    
