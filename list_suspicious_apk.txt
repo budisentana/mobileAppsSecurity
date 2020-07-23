@@ -1,5 +1,4 @@
 me.fitcloud.app.android.app101.apk
-suspicious_apps.txt
 appinventor.ai_Appscuanticas.Treinos_e_Exercicios.apk
 com.fitness.mybodymass.bmicalculator.apk
 bpsplankw.apps.com.apk

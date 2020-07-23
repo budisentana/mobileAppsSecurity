@@ -26,7 +26,7 @@ def json_resp(data):
     headers = {'Authorization': APIKEY}
     data = {"hash": json.loads(data)["hash"]}
     response = requests.post(SERVER + '/api/v1/report_json', data=data, headers=headers)
-    return response
+    return response.content
 
 def check_file():
     fileName = PATH + "/Code/"+"list_suspicious_apk.txt"
@@ -48,17 +48,26 @@ def send_apk():
     with open (fileName) as myfile:
         for line in myfile:
             res_upload = upload_apk(mal_path + "/" + line.rstrip("\n"))
+            print(line)
             # scan apk
             scan_apk(res_upload)
+
             # save json object / scan result
             field_data = json.loads(res_upload)
-            file_name = field_data.get('file_name').replace(".","_")
-            # access API for json report
-            json_res = json_resp(res_upload)
-            json_path = PATH + '/Code/scan_result/'+file_name+'.json'
             dataframe.append(field_data)
+            file_name = field_data.get('file_name')
+            if file_name is None:
+                file_name = 'empty__name'
+            else:
+                file_name = file_name.replace(".","__")
+            print(file_name + '-->save')
+
+            # access API for json report
+            json_path = PATH + '/Code/scan_result/'+file_name+'.json'
+            json_res = json_resp(res_upload)
+            to_dict = json.loads(json_res)
             with open (json_path,'w+') as jp:
-                json.dump(json_res,jp) 
+                json.dump(to_dict,jp) 
 
 def write_to_json():
     json_file = PATH + '/Code/apk_with_hash.json'
